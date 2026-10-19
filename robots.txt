@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://pajar.dev/sitemap.xml
+Sitemap: https://pajarr.vercel.app/sitemap.xml
