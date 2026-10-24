@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
 function getSecret() {
-  return (process.env.ADMIN_PASSWORD || 'admin123').trim();
+  return (process.env.ADMIN_PASSWORD).trim();
 }
 
 function generateToken() {
