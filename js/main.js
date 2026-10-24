@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
      9. Portfolio filtering with FLIP animation
      --------------------------------------------------------------------- */
   const filterBtns = $$('.filter-btn');
-  const projectCards = $$('.project-card');
+  let projectCards = $$('.project-card');
   const flipEase = 'cubic-bezier(0.22, 0.8, 0.36, 1)';
 
   const matchesFilter = (card, value) => {
@@ -244,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const applyFilter = (value) => {
+    projectCards = $$('.project-card');
     const visibleBefore = new Map();
     projectCards.forEach((card) => {
       visibleBefore.set(card, !card.classList.contains('is-hidden'));
@@ -350,14 +351,241 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lastFocused instanceof HTMLElement) lastFocused.focus();
   };
 
-  projectCards.forEach((card) => {
-    $$('.project-thumb, .btn-explore', card).forEach((el) => {
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        openModal(card);
+  const bindProjectInteractions = () => {
+    projectCards = $$('.project-card');
+    projectCards.forEach((card) => {
+      $$('.project-thumb, .btn-explore', card).forEach((el) => {
+        el.onclick = (e) => {
+          e.preventDefault();
+          openModal(card);
+        };
       });
     });
-  });
+  };
+
+  bindProjectInteractions();
+
+  /* ---------------------------------------------------------------------
+     CMS Integration: Sync full content from Turso Database
+     --------------------------------------------------------------------- */
+  const syncFullContentFromCMS = async () => {
+    try {
+      const res = await fetch('/api/content');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.ok) return;
+
+      const { content = {}, services = [], experiences = [], projects = [] } = data;
+      const { hero, about, contact } = content;
+
+      // 1. Sync Hero Section
+      if (hero) {
+        const metaTags = $$('.hero-meta .mono-tag');
+        if (metaTags[0] && hero.roleTag) metaTags[0].textContent = hero.roleTag;
+        if (metaTags[1] && hero.locationTag) metaTags[1].textContent = hero.locationTag;
+
+        const h1Solid = $('.hero-heading .hero-line--solid');
+        const h1Outline = $('.hero-heading .hero-line--outline');
+        if (h1Solid && hero.headingLine1) h1Solid.textContent = hero.headingLine1;
+        if (h1Outline && hero.headingLine2) h1Outline.textContent = hero.headingLine2;
+
+        const heroIntroP = $('.hero-intro p');
+        if (heroIntroP && hero.intro) heroIntroP.textContent = hero.intro;
+
+        if (Array.isArray(hero.metrics)) {
+          const metricEls = $$('.hero-metrics .metric');
+          hero.metrics.forEach((m, idx) => {
+            if (metricEls[idx]) {
+              const valEl = $('.metric-val', metricEls[idx]);
+              const lblEl = $('.metric-lbl', metricEls[idx]);
+              if (valEl && m.val) valEl.textContent = m.val;
+              if (lblEl && m.lbl) lblEl.textContent = m.lbl;
+            }
+          });
+        }
+
+        if (hero.tickerItems) {
+          const items = hero.tickerItems.split(',').map((t) => t.trim()).filter(Boolean);
+          const tickerHtml = items.map((t) => `<div class="ticker-item">${t} <span class="ticker-star">&bull;</span></div>`).join('');
+          $$('.ticker-group').forEach((g) => { g.innerHTML = tickerHtml; });
+        }
+      }
+
+      // 2. Sync About Section
+      if (about) {
+        if (about.aboutLead) {
+          const leadEl = $('.about-lead');
+          if (leadEl) leadEl.textContent = about.aboutLead;
+        }
+        if (about.aboutSub) {
+          const subEl = $('.about-sub');
+          if (subEl) subEl.textContent = about.aboutSub;
+        }
+        if (about.cvLink) {
+          const cvBtn = $('.about-top-row a.btn-outline');
+          if (cvBtn) cvBtn.setAttribute('href', about.cvLink);
+        }
+        if (Array.isArray(about.specSheet)) {
+          const specContainer = $('.spec-sheet');
+          if (specContainer) {
+            const rowsHtml = about.specSheet.map((s) => `
+              <div class="spec-row"><span class="spec-k">${s.k}</span><span class="spec-v">${s.v}</span></div>`
+            ).join('');
+            specContainer.innerHTML = `<div class="spec-sheet-title"><span>Spec Sheet</span><span>01</span></div>${rowsHtml}`;
+          }
+        }
+      }
+
+      // 3. Sync Services Section
+      if (Array.isArray(services) && services.length > 0) {
+        const servicesGridEl = $('.services-grid');
+        if (servicesGridEl) {
+          servicesGridEl.innerHTML = services.map((s, idx) => {
+            const sTags = (s.tags || '').split(',').map((t) => t.trim()).filter(Boolean);
+            const tagsHtml = sTags.map((t) => `<span class="tag">${t}</span>`).join('');
+            const imgSrc = s.image || 'images/siarvi.webp';
+            const num = String(idx + 1).padStart(2, '0');
+
+            return `
+              <article class="service-card is-revealed" data-reveal>
+                <span class="card-index">${num}</span>
+                <div class="service-card-art">
+                  <img src="${imgSrc}" alt="${s.title}" loading="lazy" decoding="async">
+                </div>
+                <h3 class="service-card-title">${s.title}</h3>
+                <p class="service-card-desc">${s.description}</p>
+                <div class="service-tags">${tagsHtml}</div>
+              </article>`;
+          }).join('\n');
+        }
+      }
+
+      // 4. Sync Experiences Section
+      if (Array.isArray(experiences) && experiences.length > 0) {
+        const expTimelineEl = $('.exp-timeline');
+        if (expTimelineEl) {
+          const companyMap = new Map();
+          experiences.forEach((e) => {
+            if (!companyMap.has(e.company)) {
+              companyMap.set(e.company, { company: e.company, period: e.company_period, roles: [] });
+            }
+            companyMap.get(e.company).roles.push(e);
+          });
+
+          expTimelineEl.innerHTML = Array.from(companyMap.values()).map((c) => {
+            const rolesHtml = c.roles.map((r) => {
+              let bullets = [];
+              try {
+                bullets = typeof r.bullets === 'string' ? JSON.parse(r.bullets || '[]') : (r.bullets || []);
+              } catch (err) {
+                bullets = [r.bullets];
+              }
+              const bulletList = bullets.map((b) => `<li>${b}</li>`).join('');
+
+              return `
+                <div class="exp-role">
+                  <div class="exp-role-head">
+                    <h3 class="exp-role-title">${r.role_title}</h3>
+                    <span class="exp-period">${r.role_period}</span>
+                  </div>
+                  ${r.stack ? `<div class="exp-stack">${r.stack}</div>` : ''}
+                  <ul class="exp-list">${bulletList}</ul>
+                </div>`;
+            }).join('\n');
+
+            return `
+              <article class="exp-entry is-revealed" data-reveal>
+                <div class="exp-company-row">
+                  <span class="exp-company">${c.company}</span>
+                  <span class="exp-company-period">${c.period}</span>
+                </div>
+                ${rolesHtml}
+              </article>`;
+          }).join('\n');
+        }
+      }
+
+      // 5. Sync Projects Section
+      if (Array.isArray(projects) && projects.length > 0) {
+        const grid = $('.projects-grid');
+        if (grid) {
+          grid.innerHTML = projects.map((p) => {
+            const tags = (p.tags || '').split(',').map((t) => t.trim()).filter(Boolean);
+            const tagsHtml = tags.map((t) => `<span class="tag tag--mono">${t}</span>`).join('\n                ');
+            const imgSrc = p.image || 'images/jasakita.webp';
+
+            return `
+              <article class="project-card is-revealed" data-category="${p.category || 'fullstack'}" data-reveal>
+                <div class="project-thumb">
+                  <span class="project-chip">${p.chip || 'Project'}</span>
+                  <img src="${imgSrc}" alt="${p.title}" loading="lazy" decoding="async">
+                </div>
+                <div class="project-info">
+                  <h3 class="project-title">${p.title}</h3>
+                  <p class="project-desc">${p.description || ''}</p>
+                  <div class="project-tags">
+                    ${tagsHtml}
+                  </div>
+                  <div class="project-action">
+                    <button class="btn-explore" type="button">
+                      View Full Details &nearr;
+                    </button>
+                  </div>
+                </div>
+              </article>`;
+          }).join('\n');
+
+          const allFilterBtn = $('.filter-btn[data-filter="all"]');
+          if (allFilterBtn) {
+            allFilterBtn.textContent = `All Projects (${projects.length})`;
+          }
+
+          bindProjectInteractions();
+
+          const activeFilter = $('.filter-btn.is-active');
+          if (activeFilter) {
+            applyFilter(activeFilter.getAttribute('data-filter') || 'all');
+          }
+        }
+      }
+
+      // 6. Sync Contact Section
+      if (contact) {
+        const contactTitleEl = $('.contact-left h2');
+        if (contactTitleEl && contact.heading) contactTitleEl.textContent = contact.heading;
+
+        const contactDescEl = $('.contact-desc');
+        if (contactDescEl && contact.desc) contactDescEl.textContent = contact.desc;
+
+        if (contact.email) {
+          const emailValEl = $('.email-val');
+          if (emailValEl) emailValEl.textContent = contact.email;
+          const copyEmailBtn = $('.btn-copy-email');
+          if (copyEmailBtn) copyEmailBtn.setAttribute('data-email', contact.email);
+        }
+
+        if (contact.github) {
+          const ghLink = $('.contact-social a[href*="github"]');
+          if (ghLink) ghLink.setAttribute('href', contact.github);
+        }
+        if (contact.linkedin) {
+          const liLink = $('.contact-social a[href*="linkedin"]');
+          if (liLink) liLink.setAttribute('href', contact.linkedin);
+        }
+        if (contact.locationUrl) {
+          const locLink = $('.contact-social a[href*="maps"]');
+          if (locLink) {
+            locLink.setAttribute('href', contact.locationUrl);
+            if (contact.location) locLink.textContent = contact.location;
+          }
+        }
+      }
+    } catch (err) {
+      console.debug('CMS fetch fallback to static HTML:', err);
+    }
+  };
+
+  syncFullContentFromCMS();
 
   if (modalClose) modalClose.addEventListener('click', closeModal);
   if (modal) {

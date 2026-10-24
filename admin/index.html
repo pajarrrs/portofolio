@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Portfolio</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="admin-header">
+    <div class="container nav-wrap">
+      <div class="logo-group">
+        <span class="site-brand">pajar<span>.engineer</span></span>
+        <span class="slash-separator">/</span>
+        <span class="site-title">admin</span>
+      </div>
+      <div class="header-actions">
+        <a href="/" target="_blank" class="btn btn-secondary btn-sm" title="View live site">
+          <span>Live Site</span> &nearr;
+        </a>
+        <button id="logoutBtn" class="btn btn-secondary btn-sm" style="display: none;">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav id="tabsBar" class="tabs-nav-bar" style="display: none;">
+    <div class="container">
+      <div class="tabs-list">
+        <button class="tab-btn is-active" data-tab="tabProjects">Projects (<span id="tabCountProjects">0</span>)</button>
+        <button class="tab-btn" data-tab="tabExperiences">Experience (<span id="tabCountExp">0</span>)</button>
+        <button class="tab-btn" data-tab="tabServices">Services (<span id="tabCountServices">0</span>)</button>
+        <button class="tab-btn" data-tab="tabHeroContact">Hero &amp; Contact</button>
+        <button class="tab-btn" data-tab="tabAbout">About</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Login Screen -->
+  <main id="loginView" class="login-screen">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>Admin Console</h1>
+        <p>Enter your password to manage site content.</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="adminPassword">Password</label>
+          <input 
+            type="password" 
+            id="adminPassword" 
+            class="form-input" 
+            placeholder="••••••••••••" 
+            required 
+            autocomplete="current-password"
+          >
+        </div>
+        <button type="submit" id="loginSubmitBtn" class="btn btn-primary" style="width: 100%;">
+          Sign In
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Dashboard View -->
+  <main id="dashboardView" class="dashboard-view" style="display: none;">
+    <div class="container">
+
+      <!-- TAB 1: PROJECTS -->
+      <section id="tabProjects" class="tab-pane is-active">
+        <div class="dash-topbar">
+          <div class="dash-heading">
+            <h2>Projects</h2>
+            <p id="projectCountText">Selected production works and case studies.</p>
+          </div>
+          <div>
+            <button id="addProjectBtn" class="btn btn-primary">+ New Project</button>
+          </div>
+        </div>
+        <div id="projectsGrid" class="projects-admin-grid"></div>
+      </section>
+
+      <!-- TAB 2: WORK EXPERIENCE -->
+      <section id="tabExperiences" class="tab-pane">
+        <div class="dash-topbar">
+          <div class="dash-heading">
+            <h2>Work Experience</h2>
+            <p id="expCountText">Career history and timeline.</p>
+          </div>
+          <div>
+            <button id="addExpBtn" class="btn btn-primary">+ New Experience</button>
+          </div>
+        </div>
+        <div id="expList"></div>
+      </section>
+
+      <!-- TAB 3: SERVICES -->
+      <section id="tabServices" class="tab-pane">
+        <div class="dash-topbar">
+          <div class="dash-heading">
+            <h2>Services</h2>
+            <p id="servicesCountText">Engineering capabilities and offerings.</p>
+          </div>
+          <div>
+            <button id="addServiceBtn" class="btn btn-primary">+ New Service</button>
+          </div>
+        </div>
+        <div id="servicesGrid" class="projects-admin-grid"></div>
+      </section>
+
+      <!-- TAB 4: HERO & CONTACT -->
+      <section id="tabHeroContact" class="tab-pane">
+        <div class="settings-box">
+          <h3>Hero Section &amp; Ticker</h3>
+          <p class="subtext">Headline copy, intro statement, and key stats.</p>
+          <form id="heroForm">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="heroRoleTag">Role Tag</label>
+                <input type="text" id="heroRoleTag" class="form-input" placeholder="// Software Engineer">
+              </div>
+              <div class="form-group">
+                <label for="heroLocationTag">Location Tag</label>
+                <input type="text" id="heroLocationTag" class="form-input" placeholder="Bogor, ID — UTC+7">
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="heroHeading1">Headline Line 1</label>
+                <input type="text" id="heroHeading1" class="form-input" placeholder="BUILD">
+              </div>
+              <div class="form-group">
+                <label for="heroHeading2">Headline Line 2 (Outline)</label>
+                <input type="text" id="heroHeading2" class="form-input" placeholder="NOW">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="heroIntro">Intro Paragraph</label>
+              <textarea id="heroIntro" class="form-textarea" placeholder="Software Engineer specializing in enterprise web applications..."></textarea>
+            </div>
+
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="heroM1Val">Metric 1 (Value &amp; Label)</label>
+                <input type="text" id="heroM1Val" class="form-input" style="margin-bottom: 0.25rem;" placeholder="3+">
+                <input type="text" id="heroM1Lbl" class="form-input" placeholder="Years Experience">
+              </div>
+              <div class="form-group">
+                <label for="heroM2Val">Metric 2 (Value &amp; Label)</label>
+                <input type="text" id="heroM2Val" class="form-input" style="margin-bottom: 0.25rem;" placeholder="13+">
+                <input type="text" id="heroM2Lbl" class="form-input" placeholder="Delivered Projects">
+              </div>
+              <div class="form-group">
+                <label for="heroM3Val">Metric 3 (Value &amp; Label)</label>
+                <input type="text" id="heroM3Val" class="form-input" style="margin-bottom: 0.25rem;" placeholder="8+">
+                <input type="text" id="heroM3Lbl" class="form-input" placeholder="Enterprise Modules">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="heroTicker">Tech Stack Running Ticker (Comma separated)</label>
+              <input type="text" id="heroTicker" class="form-input" placeholder="LARAVEL, PHP, VUE.JS, REACT.JS, NEXT.JS, NODE.JS...">
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="saveHeroBtn">Save Hero</button>
+          </form>
+        </div>
+
+        <div class="settings-box">
+          <h3>Contact &amp; Social Links</h3>
+          <p class="subtext">Direct email, social profiles, and location info.</p>
+          <form id="contactFormSettings">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="contactHeading">Contact Heading</label>
+                <input type="text" id="contactHeading" class="form-input" placeholder="LET'S TALK.">
+              </div>
+              <div class="form-group">
+                <label for="contactEmail">Direct Email</label>
+                <input type="email" id="contactEmail" class="form-input" placeholder="pajarr2302@gmail.com">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="contactDesc">Contact Subtext</label>
+              <textarea id="contactDesc" class="form-textarea" placeholder="Have a project, full-time engineering opportunity..."></textarea>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="contactGithub">GitHub URL</label>
+                <input type="url" id="contactGithub" class="form-input" placeholder="https://github.com/pajarrrs">
+              </div>
+              <div class="form-group">
+                <label for="contactLinkedin">LinkedIn URL</label>
+                <input type="url" id="contactLinkedin" class="form-input" placeholder="https://linkedin.com/in/...">
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="contactLocation">Location Text</label>
+                <input type="text" id="contactLocation" class="form-input" placeholder="Bogor, ID">
+              </div>
+              <div class="form-group">
+                <label for="contactLocationUrl">Google Maps URL</label>
+                <input type="url" id="contactLocationUrl" class="form-input" placeholder="https://maps.app.goo.gl/...">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="saveContactBtn">Save Contact</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- TAB 5: ABOUT -->
+      <section id="tabAbout" class="tab-pane">
+        <div class="settings-box">
+          <h3>About &amp; Spec Sheet</h3>
+          <p class="subtext">Biography, background overview, and CV document link.</p>
+          <form id="aboutForm">
+            <div class="form-group">
+              <label for="aboutCvLink">CV Document Path / URL</label>
+              <input type="text" id="aboutCvLink" class="form-input" placeholder="assets/CV_Pajar_Software_Engineer.pdf">
+            </div>
+
+            <div class="form-group">
+              <label for="aboutLead">Lead Paragraph</label>
+              <textarea id="aboutLead" class="form-textarea" placeholder="Software Engineer with 3+ years of experience building..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="aboutSub">Secondary Details Paragraph</label>
+              <textarea id="aboutSub" class="form-textarea" style="min-height: 110px;" placeholder="Fullstack across Laravel, Node.js, React.js..."></textarea>
+            </div>
+
+            <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.75rem; color: var(--accent); font-family: var(--font-mono);">// SPEC SHEET</h4>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="specName">Name</label>
+                <input type="text" id="specName" class="form-input" placeholder="Pajar">
+              </div>
+              <div class="form-group">
+                <label for="specRole">Role</label>
+                <input type="text" id="specRole" class="form-input" placeholder="Software Engineer">
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="specBased">Based In</label>
+                <input type="text" id="specBased" class="form-input" placeholder="Bogor, West Java, ID">
+              </div>
+              <div class="form-group">
+                <label for="specExp">Experience</label>
+                <input type="text" id="specExp" class="form-input" placeholder="3+ Years">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="specFocus">Focus</label>
+              <input type="text" id="specFocus" class="form-input" placeholder="Enterprise Web Apps · Query Performance · Live-System Troubleshooting">
+            </div>
+
+            <div class="form-group">
+              <label for="specStatus">Status</label>
+              <input type="text" id="specStatus" class="form-input" placeholder="Open to WFO — Jabodetabek">
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="saveAboutBtn">Save About</button>
+          </form>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODAL: PROJECT (CREATE / EDIT) -->
+  <div id="projectModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalHeading">New Project</h3>
+        <button type="button" class="btn-close modal-close-trigger">&times;</button>
+      </div>
+
+      <form id="projectForm">
+        <input type="hidden" id="fieldId">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="fieldTitle">Project Title *</label>
+            <input type="text" id="fieldTitle" class="form-input" placeholder="e.g. JasaKita — On-Demand Service Marketplace" required>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="fieldCategory">Filter Category * (all, healthtech, enterprise, fullstack)</label>
+              <input type="text" id="fieldCategory" class="form-input" placeholder="e.g. fullstack enterprise" required>
+            </div>
+            <div class="form-group">
+              <label for="fieldChip">Badge Chip</label>
+              <input type="text" id="fieldChip" class="form-input" placeholder="e.g. Marketplace & Mobile">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="fieldImage">Image Path / URL</label>
+              <input type="text" id="fieldImage" class="form-input" placeholder="images/jasakita.webp or https://...">
+            </div>
+            <div class="form-group">
+              <label for="fieldOrder">Display Order</label>
+              <input type="number" id="fieldOrder" class="form-input" value="0" min="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="fieldTags">Tech Stack Tags (Comma separated)</label>
+            <input type="text" id="fieldTags" class="form-input" placeholder="Laravel, Livewire, TailwindCSS, MySQL">
+          </div>
+
+          <div class="form-group">
+            <label for="fieldDesc">Project Description</label>
+            <textarea id="fieldDesc" class="form-textarea" placeholder="Describe the system architecture, features, and challenges solved..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close-trigger">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modalSaveBtn">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EXPERIENCE (CREATE / EDIT) -->
+  <div id="expModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="expModalHeading">New Experience</h3>
+        <button type="button" class="btn-close modal-close-trigger">&times;</button>
+      </div>
+
+      <form id="expForm">
+        <input type="hidden" id="expFieldId">
+        <div class="modal-body">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="expCompany">Company Name *</label>
+              <input type="text" id="expCompany" class="form-input" placeholder="e.g. Alturian" required>
+            </div>
+            <div class="form-group">
+              <label for="expCompanyPeriod">Tenure Period *</label>
+              <input type="text" id="expCompanyPeriod" class="form-input" placeholder="e.g. Jun 2024 – Present" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="expRoleTitle">Role / Position *</label>
+              <input type="text" id="expRoleTitle" class="form-input" placeholder="e.g. Software Engineer Specialist" required>
+            </div>
+            <div class="form-group">
+              <label for="expRolePeriod">Role Period *</label>
+              <input type="text" id="expRolePeriod" class="form-input" placeholder="e.g. Apr 2026 – Present" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="expStack">Tech Stack</label>
+            <input type="text" id="expStack" class="form-input" placeholder="Stack: Laravel, PHP, Vue.js, Angular, Sentry">
+          </div>
+
+          <div class="form-group">
+            <label for="expBullets">Key Responsibilities &amp; Achievements (One bullet per line)</label>
+            <textarea id="expBullets" class="form-textarea" style="min-height: 140px;" placeholder="Write each responsibility on a new line..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="expOrder">Display Order</label>
+            <input type="number" id="expOrder" class="form-input" value="0" min="0">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close-trigger">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveExpBtn">Save Experience</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SERVICE (CREATE / EDIT) -->
+  <div id="serviceModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="serviceModalHeading">New Service</h3>
+        <button type="button" class="btn-close modal-close-trigger">&times;</button>
+      </div>
+
+      <form id="serviceForm">
+        <input type="hidden" id="serviceFieldId">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="serviceTitle">Service Name *</label>
+            <input type="text" id="serviceTitle" class="form-input" placeholder="e.g. Backend & API Architecture" required>
+          </div>
+
+          <div class="form-group">
+            <label for="serviceDesc">Service Description *</label>
+            <textarea id="serviceDesc" class="form-textarea" placeholder="Detail the engineering specialization..." required></textarea>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="serviceImage">Illustration Path</label>
+              <input type="text" id="serviceImage" class="form-input" placeholder="images/siarvi.webp">
+            </div>
+            <div class="form-group">
+              <label for="serviceOrder">Display Order</label>
+              <input type="number" id="serviceOrder" class="form-input" value="0" min="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="serviceTags">Tech Tags (Comma separated)</label>
+            <input type="text" id="serviceTags" class="form-input" placeholder="Laravel, PHP, REST API, MySQL">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close-trigger">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveServiceBtn">Save Service</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastBox" class="toast-box"></div>
+
+  <script src="/admin/admin.js"></script>
+</body>
+</html>
