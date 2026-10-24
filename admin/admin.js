@@ -785,9 +785,24 @@ async function loadMessages() {
   }
 }
 
+function formatWIB(dateStr) {
+  if (!dateStr) return '';
+  const iso = dateStr.includes('T') ? (dateStr.endsWith('Z') ? dateStr : dateStr + 'Z') : dateStr.replace(' ', 'T') + 'Z';
+  const d = new Date(iso);
+  return d.toLocaleString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).replace(/\./g, ':') + ' WIB';
+}
+
 function renderMessages() {
   const unreadCount = state.messages.filter(m => !m.is_read).length;
-  tabCountMessages.textContent = unreadCount > 0 ? `${state.messages.length} (${unreadCount} new)` : state.messages.length;
+  tabCountMessages.textContent = unreadCount > 0 ? `${unreadCount} new` : state.messages.length;
   messagesCountText.textContent = `${state.messages.length} inquiries received (${unreadCount} unread).`;
 
   if (state.messages.length === 0) {
@@ -801,10 +816,7 @@ function renderMessages() {
 
   messagesList.innerHTML = state.messages.map(m => {
     const isUnread = !m.is_read;
-    const dateFormatted = new Date(m.created_at).toLocaleString('id-ID', {
-      dateStyle: 'medium',
-      timeStyle: 'short'
-    });
+    const dateFormatted = formatWIB(m.created_at);
 
     const replySubject = encodeURIComponent(`Re: Inquiry from ${m.name}`);
     const replyBody = encodeURIComponent(`Hi ${m.name},\n\nThank you for reaching out!\n\nRegarding your inquiry:\n> ${m.message.slice(0, 150)}...\n\n`);
