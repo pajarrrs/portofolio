@@ -1,52 +1,115 @@
-module.exports = async (req, res) => {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+const { initDb } = require('./_db');
+const { verifyToken } = require('./_auth');
 
-  const body = req.body || {};
-
-  // Honeypot: bot akan mengisi field tersembunyi 'company'.
-  // Diamkan seolah sukses agar bot tidak tahu dirinya ditolak.
-  if (body.company) return res.status(200).json({ ok: true });
-
-  const clamp = (v, n) => String(v || '').trim().slice(0, n);
-  const name = clamp(body.name, 120);
-  const email = clamp(body.email, 200);
-  const message = clamp(body.message, 5000);
-
-  if (!name || !message || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ error: 'Invalid input' });
-  }
-
-  const key = (process.env.RESEND_API_KEY || '').trim();
-  const to = (process.env.CONTACT_TO || 'pajarcoding@gmail.com').trim();
-  if (!key) return res.status(500).json({ error: 'Server not configured' });
-
-  let r;
+function parseBody(req) {
+  if (typeof req.body === 'object' && req.body !== null) return req.body;
   try {
-    r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: 'Portfolio <onboarding@resend.dev>',
-        to: [to],
-        reply_to: email,
-        subject: `Inquiry from ${name}`,
-        text: `${message}\n\n—\nFrom: ${name} <${email}>`,
-      }),
-    });
+    return JSON.parse(req.body || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+module.exports = async (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+
+  let db;
+  try {
+    db = await initDb();
   } catch (err) {
-    return res.status(502).json({ error: 'Send failed' });
+    console.error('Database connection failed:', err);
+    return res.status(500).json({ ok: false, error: 'Database connection failed' });
   }
 
-  if (!r.ok) {
-    const errData = await r.json().catch(() => ({}));
-    return res.status(502).json({
-      error: 'Send failed',
-      status: r.status,
-      detail: errData.message || errData.name || 'Resend rejected request'
-    });
+  // --- POST: Public endpoint for visitors submitting contact form ---
+  if (req.method === 'POST') {
+    const body = parseBody(req);
+
+    // Honeypot: bots will fill hidden 'company' field. Silently return success.
+    if (body.company) {
+      return res.status(200).json({ ok: true });
+    }
+
+    const clamp = (v, n) => String(v || '').trim().slice(0, n);
+    const name = clamp(body.name, 120);
+    const email = clamp(body.email, 200);
+    const message = clamp(body.message, 5000);
+
+    if (!name || !message || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ ok: false, error: 'Invalid input data' });
+    }
+
+    try {
+      const result = await db.execute({
+        sql: `INSERT INTO messages (name, email, message, is_read, created_at)
+              VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP)`,
+        args: [name, email, message]
+      });
+
+      return res.status(200).json({
+        ok: true,
+        message: 'Message delivered successfully',
+        id: Number(result.lastInsertRowid)
+      });
+    } catch (err) {
+      console.error('Failed to save message:', err);
+      return res.status(500).json({ ok: false, error: 'Failed to deliver message' });
+    }
   }
-  return res.status(200).json({ ok: true });
+
+  // --- All other methods require Admin Authentication ---
+  if (!verifyToken(req)) {
+    return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  }
+
+  // --- GET: Fetch all messages for the Admin panel ---
+  if (req.method === 'GET') {
+    try {
+      const result = await db.execute('SELECT * FROM messages ORDER BY id DESC');
+      return res.status(200).json({
+        ok: true,
+        messages: result.rows
+      });
+    } catch (err) {
+      console.error('Failed to fetch messages:', err);
+      return res.status(500).json({ ok: false, error: 'Failed to fetch messages' });
+    }
+  }
+
+  const body = parseBody(req);
+
+  // --- PUT: Mark message as read/unread ---
+  if (req.method === 'PUT') {
+    const { id, is_read } = body;
+    if (!id) return res.status(400).json({ ok: false, error: 'Message ID is required' });
+
+    try {
+      await db.execute({
+        sql: 'UPDATE messages SET is_read = ? WHERE id = ?',
+        args: [is_read ? 1 : 0, id]
+      });
+      return res.status(200).json({ ok: true, message: 'Message status updated' });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: 'Failed to update message' });
+    }
+  }
+
+  // --- DELETE: Delete message from inbox ---
+  if (req.method === 'DELETE') {
+    const id = body.id || (req.query && req.query.id);
+    if (!id) return res.status(400).json({ ok: false, error: 'Message ID is required' });
+
+    try {
+      await db.execute({
+        sql: 'DELETE FROM messages WHERE id = ?',
+        args: [id]
+      });
+      return res.status(200).json({ ok: true, message: 'Message deleted' });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: 'Failed to delete message' });
+    }
+  }
+
+  res.setHeader('Allow', 'GET, POST, PUT, DELETE');
+  return res.status(405).json({ ok: false, error: 'Method not allowed' });
 };

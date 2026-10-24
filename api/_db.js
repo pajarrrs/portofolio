@@ -76,6 +76,18 @@ async function initDb() {
       );
     `);
 
+    // 5. Contact Messages / Inbox Table
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        message TEXT NOT NULL,
+        is_read INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // Seed Projects if empty
     const pCount = await db.execute('SELECT COUNT(*) as total FROM projects');
     if (Number(pCount.rows[0].total || 0) === 0) {

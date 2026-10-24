@@ -520,6 +520,78 @@ body {
   line-height: 1.55;
 }
 
+/* Messages / Inbox Cards in Admin */
+.msg-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.15s;
+}
+
+.msg-card.is-unread {
+  border-left: 3px solid var(--accent);
+  background: rgba(0, 229, 153, 0.02);
+}
+
+.msg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.msg-sender-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.msg-sender-email {
+  font-size: 0.825rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+.msg-sender-email:hover {
+  text-decoration: underline;
+}
+
+.msg-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.msg-body {
+  font-size: 0.875rem;
+  color: #c9d2d9;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  background: var(--bg-surface);
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  margin-bottom: 0.85rem;
+}
+
+.msg-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.msg-unread-badge {
+  font-size: 0.7rem;
+  background: rgba(0, 229, 153, 0.12);
+  color: var(--accent);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+
 /* Modals */
 .modal-overlay {
   position: fixed;

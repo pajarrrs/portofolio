@@ -4,6 +4,7 @@ let state = {
   projects: [],
   experiences: [],
   services: [],
+  messages: [],
   content: {}
 };
 
@@ -21,6 +22,7 @@ const toastBox = document.getElementById('toastBox');
 const tabCountProjects = document.getElementById('tabCountProjects');
 const tabCountExp = document.getElementById('tabCountExp');
 const tabCountServices = document.getElementById('tabCountServices');
+const tabCountMessages = document.getElementById('tabCountMessages');
 
 // Containers
 const projectsGrid = document.getElementById('projectsGrid');
@@ -29,6 +31,8 @@ const expList = document.getElementById('expList');
 const expCountText = document.getElementById('expCountText');
 const servicesGrid = document.getElementById('servicesGrid');
 const servicesCountText = document.getElementById('servicesCountText');
+const messagesList = document.getElementById('messagesList');
+const messagesCountText = document.getElementById('messagesCountText');
 
 // Modals
 const projectModal = document.getElementById('projectModal');
@@ -169,6 +173,7 @@ async function loadAllData() {
       populateHeroForm();
       populateAboutForm();
       populateContactForm();
+      loadMessages();
     }
   } catch (err) {
     showToast('Failed to load content.', 'error');
@@ -761,6 +766,123 @@ document.getElementById('aboutForm').addEventListener('submit', async (e) => {
     showToast('Failed to save About section.', 'error');
   }
 });
+
+/* =========================================================================
+   6. MESSAGES / INBOX TAB
+   ========================================================================= */
+async function loadMessages() {
+  try {
+    const res = await fetch('/api/contact', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (res.ok) {
+      state.messages = data.messages || [];
+      renderMessages();
+    }
+  } catch (err) {
+    console.error('Failed to load messages:', err);
+  }
+}
+
+function renderMessages() {
+  const unreadCount = state.messages.filter(m => !m.is_read).length;
+  tabCountMessages.textContent = unreadCount > 0 ? `${state.messages.length} (${unreadCount} new)` : state.messages.length;
+  messagesCountText.textContent = `${state.messages.length} inquiries received (${unreadCount} unread).`;
+
+  if (state.messages.length === 0) {
+    messagesList.innerHTML = `
+      <div style="text-align: center; padding: 3rem; color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px;">
+        No inquiries yet. Messages submitted through the contact form will appear here.
+      </div>
+    `;
+    return;
+  }
+
+  messagesList.innerHTML = state.messages.map(m => {
+    const isUnread = !m.is_read;
+    const dateFormatted = new Date(m.created_at).toLocaleString('id-ID', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+
+    const replySubject = encodeURIComponent(`Re: Inquiry from ${m.name}`);
+    const replyBody = encodeURIComponent(`Hi ${m.name},\n\nThank you for reaching out!\n\nRegarding your inquiry:\n> ${m.message.slice(0, 150)}...\n\n`);
+
+    return `
+      <div class="msg-card ${isUnread ? 'is-unread' : ''}" data-id="${m.id}">
+        <div class="msg-header">
+          <div>
+            <div class="msg-sender-name">${escapeHtml(m.name)}</div>
+            <a href="mailto:${escapeHtml(m.email)}?subject=${replySubject}&body=${replyBody}" class="msg-sender-email">
+              ${escapeHtml(m.email)} &nearr;
+            </a>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            ${isUnread ? '<span class="msg-unread-badge">NEW</span>' : ''}
+            <span class="msg-time">${dateFormatted}</span>
+          </div>
+        </div>
+
+        <div class="msg-body">${escapeHtml(m.message)}</div>
+
+        <div class="msg-footer">
+          <div>
+            <a href="mailto:${escapeHtml(m.email)}?subject=${replySubject}&body=${replyBody}" class="btn btn-primary btn-sm">
+              Reply via Email &nearr;
+            </a>
+          </div>
+          <div class="p-actions">
+            <button class="btn btn-secondary btn-sm" onclick="toggleReadMessage(${m.id}, ${m.is_read})">
+              ${isUnread ? 'Mark as Read' : 'Mark as Unread'}
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="deleteMessage(${m.id})">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.toggleReadMessage = async function(id, currentStatus) {
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ id, is_read: currentStatus ? 0 : 1 })
+    });
+    if (res.ok) {
+      loadMessages();
+    }
+  } catch (err) {
+    showToast('Failed to update message status.', 'error');
+  }
+};
+
+window.deleteMessage = async function(id) {
+  if (!confirm('Delete this message?')) return;
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ id })
+    });
+    if (res.ok) {
+      showToast('Message deleted.');
+      loadMessages();
+    }
+  } catch (err) {
+    showToast('Failed to delete message.', 'error');
+  }
+};
 
 // Init
 checkAuth();
