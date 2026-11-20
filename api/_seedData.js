@@ -1,13 +1,22 @@
 // Full seed data extracted directly from index.html
 const projects = [
   {
+    title: 'Abangku Driver — Office Group Ordering PWA & Live Tracking',
+    category: 'fullstack enterprise',
+    chip: 'PWA & Live Maps',
+    description: 'Aplikasi PWA mobile-first untuk pemesanan titip makan & barang kantor dalam 2 sesi harian dengan pembagian 2 driver. Dilengkapi batching otomatis per warung, distribusi QRIS pedagang tanpa spam grup, input harga massal + price memory, pelacakan GPS driver real-time, notifikasi sesi, dan panel Super Admin.',
+    tags: 'Next.js, Tailwind CSS, SQLite, Leaflet GPS',
+    image: 'images/abangku-driver.webp',
+    order_index: 0
+  },
+  {
     title: 'JasaKita — On-Demand Service Marketplace & Bidding',
     category: 'fullstack enterprise',
     chip: 'Marketplace & Mobile',
     description: 'Platform marketplace on-demand untuk jasa spesifik dengan sistem request dan lelang penawaran (bidding) real-time antar mitra. Terintegrasi dengan aplikasi mobile Android untuk pelanggan dan mitra kerja.',
     tags: 'Laravel, Livewire Flux, Pusher JS, Capacitor',
     image: 'images/jasakita.webp',
-    order_index: 0
+    order_index: 1
   },
   {
     title: 'MuslimApps — Islamic Companion & Quranic Mobile App',
@@ -16,7 +25,7 @@ const projects = [
     description: "Aplikasi mobile ibadah Muslim modern dengan fitur jadwal sholat akurat standar Kemenag, kompas arah kiblat, tasbih digital, serta Al-Qur'an 114 surah lengkap dengan transliterasi, terjemahan, dan audio murottal via integrasi RESTful API.",
     tags: 'React Native, Capacitor, RESTful API, Mobile App',
     image: 'images/muslimapps.webp',
-    order_index: 1
+    order_index: 2
   },
   {
     title: 'JukutTaman (SiJukut) — Lawn Supply & Dynamic Cost Estimator',
@@ -25,7 +34,7 @@ const projects = [
     description: 'Platform e-commerce dan kalkulator estimasi biaya rumput taman interaktif dengan slider luas area dinamis, pemilihan varietas rumput, kalkulasi jasa tanam, dan direct WhatsApp order integration.',
     tags: 'Laravel / Next.js, TailwindCSS, Dynamic Calculator, WhatsApp API',
     image: 'images/sijukut.webp',
-    order_index: 2
+    order_index: 3
   },
   {
     title: 'Siarvi - Surveilans Penyakit DBD Kemenkes',
@@ -34,7 +43,7 @@ const projects = [
     description: 'Platform surveilans epidemiologi Kemenkes RI untuk pemantauan dan pengendalian penyebaran Arbovirosis skala nasional.',
     tags: 'CakePHP, MySQL, GIS Region',
     image: 'images/siarvi.webp',
-    order_index: 3
+    order_index: 4
   },
   {
     title: 'SiPTM - Monitoring Faktor Risiko Diabetes',
@@ -43,7 +52,7 @@ const projects = [
     description: 'Platform monitoring skrining faktor risiko penyakit tidak menular (diabetes & hipertensi) terintegrasi puskesmas.',
     tags: 'CakePHP, MySQL, Analytics',
     image: 'images/siptm.webp',
-    order_index: 4
+    order_index: 5
   },
   {
     title: 'FieldTrack - Team Task & Operations Hub',
@@ -52,7 +61,7 @@ const projects = [
     description: 'Aplikasi manajemen tugas kolaboratif tim lapangan dengan kanban board real-time, time tracking, dan granular permissions.',
     tags: 'Next.js, AdonisJS, TypeScript',
     image: 'images/fieldtrack.webp',
-    order_index: 5
+    order_index: 6
   },
   {
     title: 'Farmalkes - Elektronik Suplemen Farmakope',
@@ -61,7 +70,7 @@ const projects = [
     description: 'Portal dokumen standarisasi mutu sediaan farmasi dan regulasi bahan baku obat Kementerian Kesehatan RI.',
     tags: 'CakePHP, PostgreSQL, Archive',
     image: 'images/farmakope.webp',
-    order_index: 6
+    order_index: 7
   },
   {
     title: 'E-FILCA - Agregasi POPM Kecacingan',
@@ -70,7 +79,7 @@ const projects = [
     description: 'Sistem agregasi pemberian obat pencegahan massal (POPM) kecacingan nasional untuk pemantauan intervensi anak sekolah.',
     tags: 'Laravel, MySQL, Validation',
     image: 'images/efilca.webp',
-    order_index: 7
+    order_index: 8
   },
   {
     title: 'Cafe Cashier & Stock Inventory POS',
@@ -79,7 +88,7 @@ const projects = [
     description: 'Aplikasi kasir coffee shop dengan pemotongan stok bahan baku otomatis, display kitchen order, dan pelaporan omzet.',
     tags: 'Laravel, MySQL, Thermal Print',
     image: 'images/cafe.webp',
-    order_index: 8
+    order_index: 9
   },
   {
     title: 'Inalog - Logistik & Pergudangan',
@@ -88,7 +97,7 @@ const projects = [
     description: 'Sistem pergudangan enterprise untuk pelacakan pergerakan barang, servis peralatan, dan otomasi alur requisition.',
     tags: 'CakePHP, MySQL, Asset Tracking',
     image: 'images/inalog.webp',
-    order_index: 9
+    order_index: 10
   },
   {
     title: 'Sistem Pengaduan Aspirasi Siswa & Warga',
@@ -97,7 +106,7 @@ const projects = [
     description: 'Portal aspirasi transparan dengan tracking tiket status real-time, enkripsi lampiran dokumen, dan panel moderasi.',
     tags: 'Laravel, MySQL, Ticketing',
     image: 'images/pemas-2.webp',
-    order_index: 10
+    order_index: 11
   },
   {
     title: 'Barbershop Cashier & Booking Management',
@@ -106,7 +115,7 @@ const projects = [
     description: 'Aplikasi kasir multi-layanan dan komisi kapster dengan antrean treatment rambut dan rekap transaksi harian.',
     tags: 'PHP Native, MySQL, Commissions',
     image: 'images/barber.webp',
-    order_index: 11
+    order_index: 12
   },
   {
     title: 'Digital Library Circulation System',
@@ -115,7 +124,7 @@ const projects = [
     description: 'Sistem sirkulasi peminjaman buku digital, kartu barcode anggota, dan perhitungan denda keterlambatan otomatis.',
     tags: 'Laravel, MySQL, Barcode Scan',
     image: 'images/perpus.webp',
-    order_index: 12
+    order_index: 13
   }
 ];
 
@@ -129,7 +138,7 @@ const hero = {
   ctaLink: '#portfolio',
   metrics: [
     { val: '3+', lbl: 'Years Experience' },
-    { val: '13+', lbl: 'Delivered Projects' },
+    { val: '14+', lbl: 'Delivered Projects' },
     { val: '8+', lbl: 'Enterprise Modules' }
   ],
   tickerItems: 'LARAVEL, PHP, VUE.JS, REACT.JS, NEXT.JS, NODE.JS, MYSQL, POSTGRESQL, REDIS, NGINX, REST API, SENTRY'
