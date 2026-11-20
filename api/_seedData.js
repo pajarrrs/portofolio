@@ -1,13 +1,22 @@
 // Full seed data extracted directly from index.html
 const projects = [
   {
+    title: 'SplitStruk — AI Receipt OCR & Precision Split-Bill PWA',
+    category: 'fullstack enterprise',
+    chip: 'AI OCR & Fintech PWA',
+    description: 'Aplikasi PWA bergaya iOS untuk scan struk belanja & restoran (Hybrid Gemini Vision + Tesseract.js lokal), edit item/harga/pajak/diskon, patungan multi-orang dengan pembagian integer IDR presisi tanpa selisih Rp1, tracking status lunas, upload QRIS, serta link tagihan & rekap WhatsApp siap bagikan.',
+    tags: 'Next.js, Gemini Vision, Tesseract.js, SQLite',
+    image: 'images/splitstruk.webp',
+    order_index: 0
+  },
+  {
     title: 'Abangku Driver — Office Group Ordering PWA & Live Tracking',
     category: 'fullstack enterprise',
     chip: 'PWA & Live Maps',
     description: 'Aplikasi PWA mobile-first untuk pemesanan titip makan & barang kantor dalam 2 sesi harian dengan pembagian 2 driver. Dilengkapi batching otomatis per warung, distribusi QRIS pedagang tanpa spam grup, input harga massal + price memory, pelacakan GPS driver real-time, notifikasi sesi, dan panel Super Admin.',
     tags: 'Next.js, Tailwind CSS, SQLite, Leaflet GPS',
     image: 'images/abangku-driver.webp',
-    order_index: 0
+    order_index: 1
   },
   {
     title: 'JasaKita — On-Demand Service Marketplace & Bidding',
@@ -138,7 +147,7 @@ const hero = {
   ctaLink: '#portfolio',
   metrics: [
     { val: '3+', lbl: 'Years Experience' },
-    { val: '14+', lbl: 'Delivered Projects' },
+    { val: '15+', lbl: 'Delivered Projects' },
     { val: '8+', lbl: 'Enterprise Modules' }
   ],
   tickerItems: 'LARAVEL, PHP, VUE.JS, REACT.JS, NEXT.JS, NODE.JS, MYSQL, POSTGRESQL, REDIS, NGINX, REST API, SENTRY'

@@ -201,6 +201,66 @@ async function initDb() {
       });
     }
 
+    // One-time idempotent sync for SplitStruk on existing production Turso DBs
+    const splitSyncFlag = await db.execute({
+      sql: 'SELECT key FROM site_content WHERE key = ?',
+      args: ['seed_sync_splitstruk_v1']
+    });
+    if (splitSyncFlag.rows.length === 0) {
+      const splitSeed = seed.projects.find((p) => p.image === 'images/splitstruk.webp');
+      if (splitSeed) {
+        const existing = await db.execute({
+          sql: 'SELECT id FROM projects WHERE image = ?',
+          args: [splitSeed.image]
+        });
+        if (existing.rows.length === 0) {
+          await db.execute('UPDATE projects SET order_index = order_index + 1');
+          await db.execute({
+            sql: `INSERT INTO projects (title, category, chip, description, tags, image, order_index)
+                  VALUES (?, ?, ?, ?, ?, ?, 0)`,
+            args: [
+              splitSeed.title,
+              splitSeed.category,
+              splitSeed.chip,
+              splitSeed.description,
+              splitSeed.tags,
+              splitSeed.image
+            ]
+          });
+        }
+      }
+      const heroRow2 = await db.execute({
+        sql: 'SELECT data FROM site_content WHERE key = ?',
+        args: ['hero']
+      });
+      if (heroRow2.rows.length > 0) {
+        try {
+          const heroData = JSON.parse(String(heroRow2.rows[0].data));
+          if (Array.isArray(heroData.metrics)) {
+            let changed = false;
+            for (const m of heroData.metrics) {
+              if (m.lbl === 'Delivered Projects' && (m.val === '13+' || m.val === '14+')) {
+                m.val = '15+';
+                changed = true;
+              }
+            }
+            if (changed) {
+              await db.execute({
+                sql: "UPDATE site_content SET data = ?, updated_at = datetime('now') WHERE key = 'hero'",
+                args: [JSON.stringify(heroData)]
+              });
+            }
+          }
+        } catch {
+          // Ignore malformed hero JSON
+        }
+      }
+      await db.execute({
+        sql: 'INSERT OR IGNORE INTO site_content (key, data) VALUES (?, ?)',
+        args: ['seed_sync_splitstruk_v1', JSON.stringify({ synced: true })]
+      });
+    }
+
     return db;
   })();
 
